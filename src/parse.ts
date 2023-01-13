@@ -27,18 +27,13 @@ export default function parse(basePath: string, files: string[]) {
       const sourcePath = (source as Tkv).attribs.href
       if (extname(sourcePath) !== '.css') continue
       const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
-      if (existsSync(sourceAbsolutePath) && statSync(sourceAbsolutePath).isFile()) {
-        let data: Buffer
-        if (caches.has(sourceAbsolutePath)) {
-          data = caches.get(sourceAbsolutePath)
-        } else {
-          data = readFileSync(sourceAbsolutePath)
-          caches.set(sourceAbsolutePath, data)
-        }
+      if (existsSync(sourceAbsolutePath) && statSync(sourceAbsolutePath).isFile() && !caches.has(sourceAbsolutePath)) {
+        const data = readFileSync(sourceAbsolutePath)
+        caches.set(sourceAbsolutePath, data)
         parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)
-        getText(dom, declaredFamilyMap)
       }
     }
+    getText(dom, declaredFamilyMap)
   }
   return declaredFamilyMap
 }
