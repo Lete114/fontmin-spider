@@ -1,0 +1,56 @@
+{
+  "name": "fontmin-spider",
+  "version": "1.0.0-beta.0",
+  "description": "Analyze which fonts are used on the page and eliminate the ones that are not used to get a smaller font file",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "lint": "eslint src && prettier --check src",
+    "lint:fix": "eslint --fix src && prettier --check --write src"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Lete <me@imlete.cn> (https://www.imlete.cn)",
+  "license": "MIT",
+  "keywords": [
+    "font",
+    "fontmin",
+    "minify",
+    "compression"
+  ],
+  "homepage": "https://github.com/Lete114/fontmin-spider#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lete114/fontmin-spider.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lete114/fontmin-spider/issues"
+  },
+  "dependencies": {
+    "css-select": "^5.1.0",
+    "domutils": "^3.0.1",
+    "fast-glob": "^3.2.12",
+    "fontmin": "^0.9.9",
+    "htmlparser2": "^8.0.1",
+    "postcss": "^8.4.21"
+  },
+  "devDependencies": {
+    "@types/fontmin": "^0.9.0",
+    "@types/fs-extra": "^9.0.13",
+    "@types/jsdom": "^20.0.1",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.11.0",
+    "@types/pretty-hrtime": "^1.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "@typescript-eslint/parser": "^5.40.0",
+    "eslint": "^8.20.0",
+    "fs-extra": "^11.1.0",
+    "get-folder-size": "^4.0.0",
+    "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4",
+    "vitest": "^0.27.1"
+  }
+}
