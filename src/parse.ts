@@ -3,7 +3,7 @@ import { extname } from 'node:path'
 import { parseDocument } from 'htmlparser2'
 import selectAll from 'css-select'
 import { textContent } from 'domutils'
-import parseFamilyMap from './utils/parse-family-map'
+import { getFamily, parseFamilyMap } from './utils/parse-family-map'
 import { getAbsolutePath, getHash, unique } from './utils'
 import { TdeclaredFamilyMap, Tkv } from './types'
 
@@ -22,10 +22,10 @@ export default function parse(basePath: string, files: string[]) {
   for (const file of files) {
     const content = readFileSync(file).toString()
     const dom = parseDocument(content)
-    const sources = selectAll('style,link[href]', dom)
+    const sources = selectAll('style,link[href],[style]', dom)
     for (const source of sources) {
-      const sourcePath = (source as Tkv).attribs.href
-      if ((source as Tkv).tagName === 'style') {
+      // handler style tags
+      if ((source as Tkv).name === 'style') {
         const StyleTextContent = textContent(source)
         const hash = getHash(StyleTextContent)
         if (!caches.has(hash)) {
@@ -34,6 +34,8 @@ export default function parse(basePath: string, files: string[]) {
         }
         continue
       }
+      // handler link tags
+      const sourcePath = (source as Tkv).attribs.href || ''
       const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
       if (
         extname(sourcePath) === '.css' &&
@@ -44,6 +46,13 @@ export default function parse(basePath: string, files: string[]) {
         const data = readFileSync(sourceAbsolutePath)
         caches.set(sourceAbsolutePath, data)
         parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)
+        continue
+      }
+      const AttrStyleContent = (source as Tkv).attribs.style
+      const family = getFamily(declaredFamilyMap, AttrStyleContent)
+
+      if (declaredFamilyMap[family]) {
+        declaredFamilyMap[family].chars += unique(textContent(source))
       }
     }
     getText(dom, declaredFamilyMap)
@@ -52,7 +61,7 @@ export default function parse(basePath: string, files: string[]) {
 }
 /* eslint-enable */
 
-function getText(dom: Document, familyMap: Tkv) {
+function getText(dom: Document, familyMap: TdeclaredFamilyMap) {
   for (const key in familyMap) {
     const value = familyMap[key]
     if (!value) continue

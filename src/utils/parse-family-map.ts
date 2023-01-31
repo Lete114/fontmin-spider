@@ -4,7 +4,29 @@ import type { Root } from 'postcss'
 import { Tkv } from '../types'
 import { getQuoteless, getUrls, getAbsolutePath } from '.'
 
-export default parseFamilyMap
+/**
+ * Parsing the referenced font
+ * @param { Tkv } declaredFamilyMap Mapping of used fonts
+ * @param { string | Buffer } content css file content
+ */
+export function getFamily(declaredFamilyMap: Tkv, content: string | Buffer) {
+  let family = ''
+  postcss({
+    postcssPlugin: 'fontmin-spider-family-parse',
+    Once(root) {
+      root.walkDecls(/font-family|font/, (decl) => {
+        family = decl.value
+        if (decl.prop === 'font') {
+          const font = Object.entries(declaredFamilyMap).find(([k]) => family.match(new RegExp(k)))
+          if (font) family = font[0]
+        }
+        family = family.split(',').find((item) => declaredFamilyMap[getQuoteless(item.trim())]) || ''
+        family = getQuoteless(family)
+      })
+    }
+  }).process(content).css
+  return family
+}
 
 /**
  * Parsing the referenced font
@@ -13,7 +35,7 @@ export default parseFamilyMap
  * @param { string | Buffer } content css file content
  * @param { string } importPath css file path
  */
-function parseFamilyMap(basePath: string, declaredFamilyMap: Tkv, content: string | Buffer, importPath: string) {
+export function parseFamilyMap(basePath: string, declaredFamilyMap: Tkv, content: string | Buffer, importPath: string) {
   postcss({
     postcssPlugin: 'fontmin-spider-family-parse',
     Once(root) {

@@ -82,15 +82,15 @@
         content: 'c';
       }
 
-      /* (暂不支持) 行内样式 */
+      /* 行内样式 */
       #font-d .basic-element {
         font-family: 'd';
       }
 
-      /* (暂不支持) 伪元素字体继承 */
       #font-e {
         font-family: 'e';
       }
+      /* (暂不支持) 伪元素字体继承 */
       #font-e .pseudo-element::before {
         content: 'b';
       }
@@ -104,8 +104,29 @@
     <p>Analyze which fonts are used on the page and eliminate the ones that are not used to get a smaller font file</p>
 
     <div id="font-a">
-      <div class="basic-element">aa</div>
-      <div class="pseudo-element">dd</div>
+      <div class="basic-element">a</div>
+      <div class="pseudo-element">d</div>
+    </div>
+
+    <div id="font-b">
+      <div class="basic-element">a</div>
+      <div class="pseudo-element">d</div>
+    </div>
+
+    <div id="font-c">
+      <div class="basic-element">a</div>
+      <div class="pseudo-element">d</div>
+    </div>
+
+    <div id="font-d">
+      <div style="font-family: 'd'">a</div>
+      <div style="font-family: 'd'">b</div>
+      <div class="basic-element">c</div>
+    </div>
+
+    <div id="font-e">
+      <div class="basic-element">a</div>
+      <div class="pseudo-element">d</div>
     </div>
   </body>
 </html>
