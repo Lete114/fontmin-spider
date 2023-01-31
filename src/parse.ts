@@ -4,7 +4,7 @@ import { parseDocument } from 'htmlparser2'
 import selectAll from 'css-select'
 import { textContent } from 'domutils'
 import parseFamilyMap from './utils/parse-family-map'
-import { getAbsolutePath, unique } from './utils'
+import { getAbsolutePath, getHash, unique } from './utils'
 import { TdeclaredFamilyMap, Tkv } from './types'
 
 type Document = ReturnType<typeof parseDocument>
@@ -15,19 +15,32 @@ type Document = ReturnType<typeof parseDocument>
  * @param { string[] } files Array of html files
  * @returns { TdeclaredFamilyMap }
  */
-/* eslint-disable max-depth */
+/* eslint-disable max-depth,max-statements */
 export default function parse(basePath: string, files: string[]) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
   const caches = new Map()
   for (const file of files) {
     const content = readFileSync(file).toString()
     const dom = parseDocument(content)
-    const sources = selectAll('link[href]', dom)
+    const sources = selectAll('style,link[href]', dom)
     for (const source of sources) {
       const sourcePath = (source as Tkv).attribs.href
-      if (extname(sourcePath) !== '.css') continue
+      if ((source as Tkv).tagName === 'style') {
+        const StyleTextContent = textContent(source)
+        const hash = getHash(StyleTextContent)
+        if (!caches.has(hash)) {
+          caches.set(hash, StyleTextContent)
+          parseFamilyMap(basePath, declaredFamilyMap, StyleTextContent, file)
+        }
+        continue
+      }
       const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
-      if (existsSync(sourceAbsolutePath) && statSync(sourceAbsolutePath).isFile() && !caches.has(sourceAbsolutePath)) {
+      if (
+        extname(sourcePath) === '.css' &&
+        existsSync(sourceAbsolutePath) &&
+        statSync(sourceAbsolutePath).isFile() &&
+        !caches.has(sourceAbsolutePath)
+      ) {
         const data = readFileSync(sourceAbsolutePath)
         caches.set(sourceAbsolutePath, data)
         parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)

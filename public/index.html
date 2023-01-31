@@ -6,8 +6,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link rel="stylesheet" href="style/index.css" />
+    <style>
+      /* https://github.com/aui/font-spider/blob/c1547c4da8c38e0625145be5c4826b444ce28997/test/files/index.html */
+      @font-face {
+        font-family: 'a';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'b';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'c';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'd';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'e';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'f';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'g';
+        src: url('/font/SmileySans-Oblique.ttf.woff2') format('woff2');
+      }
+
+      /*普通选择器+显式 font-family 声明*/
+      #font-a .basic-element {
+        font-family: 'a';
+      }
+
+      /*伪元素选择器+显式 font-family 声明*/
+      #font-a .pseudo-element::before {
+        font-family: 'a';
+        content: 'b';
+      }
+      #font-a .pseudo-element::after {
+        font-family: 'a';
+        content: 'c';
+      }
+
+      /*普通选择器+显式 font(缩写) 声明*/
+      #font-b .basic-element {
+        font: 16px 'b';
+      }
+
+      /*伪元素选择器+显式 font(缩写) 声明*/
+      #font-b .pseudo-element::before {
+        font: 16px 'b';
+        content: 'b';
+      }
+      #font-b .pseudo-element::after {
+        font: 16px 'b';
+        content: 'c';
+      }
+
+      /*伪类选择器*/
+      #font-c:hover .basic-element {
+        font-family: 'c';
+      }
+
+      /*伪元素选择器+显式 font-family 声明*/
+      #font-c:focus .pseudo-element::before {
+        font-family: 'c';
+        content: 'b';
+      }
+      #font-c .pseudo-element:hover::after {
+        font-family: 'c';
+        content: 'c';
+      }
+
+      /* (暂不支持) 行内样式 */
+      #font-d .basic-element {
+        font-family: 'd';
+      }
+
+      /* (暂不支持) 伪元素字体继承 */
+      #font-e {
+        font-family: 'e';
+      }
+      #font-e .pseudo-element::before {
+        content: 'b';
+      }
+      #font-e .pseudo-element::after {
+        font-family: inherit;
+        content: 'c';
+      }
+    </style>
   </head>
   <body>
     <p>Analyze which fonts are used on the page and eliminate the ones that are not used to get a smaller font file</p>
+
+    <div id="font-a">
+      <div class="basic-element">aa</div>
+      <div class="pseudo-element">dd</div>
+    </div>
   </body>
 </html>

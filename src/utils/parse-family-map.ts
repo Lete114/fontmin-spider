@@ -50,16 +50,30 @@ function parseFontFace(root: Root, basePath: string, importPath: string, declare
 }
 
 function parseSelector(root: Root, declaredFamilyMap: Tkv) {
-  root.walkDecls('font-family', (decl) => {
+  const reg = /:?:(active|hover|focus|before|after)/g
+  root.walkDecls(/font-family|font/, (decl) => {
+    let content = ''
+    let family = decl.value
     let selector = decl.parent && (decl.parent as Tkv).selector
-    selector = (selector || '').replace(/:?:(active|hover|focus|before|after)/g, '')
 
-    let family = getQuoteless(decl.value)
+    if (!selector) return
+
+    if (reg.test(selector)) {
+      const value = decl.parent?.nodes.find((node) => (node as Tkv).prop === 'content')
+      if (value) content = getQuoteless((value as Tkv).value)
+    }
+    selector = (selector as string).replace(reg, '')
+
+    if (decl.prop === 'font') {
+      const font = Object.entries(declaredFamilyMap).find(([k]) => family.match(new RegExp(k)))
+      if (font) family = font[0]
+    }
     family = family.split(',').find((item) => declaredFamilyMap[getQuoteless(item.trim())]) || ''
     family = getQuoteless(family)
 
-    if (selector && declaredFamilyMap[family] && !declaredFamilyMap[family].selector.includes(selector)) {
-      declaredFamilyMap[family].selector.push(selector)
+    if (selector && declaredFamilyMap[family]) {
+      if (!declaredFamilyMap[family].selector.includes(selector)) declaredFamilyMap[family].selector.push(selector)
+      declaredFamilyMap[family].chars += content
     }
   })
 }
