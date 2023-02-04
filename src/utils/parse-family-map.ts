@@ -2,7 +2,7 @@ import { existsSync, statSync } from 'node:fs'
 import postcss from 'postcss'
 import type { Root } from 'postcss'
 import { Tkv } from '../types'
-import { getQuoteless, getUrls, getAbsolutePath } from '.'
+import { getQuoteless, getUrls, getAbsolutePath, removeParam } from '.'
 
 /**
  * Parsing the referenced font
@@ -53,7 +53,8 @@ function parseFontFace(root: Root, basePath: string, importPath: string, declare
     rule.walkDecls(/font-family|src/, (decl) => {
       if (decl.value && decl.value.includes('url(')) {
         getUrls(decl.value).forEach((meta) => {
-          const filePath = getAbsolutePath(basePath, importPath, meta.value)
+          const sourcePath = removeParam(meta.value)
+          const filePath = getAbsolutePath(basePath, importPath, sourcePath)
           if (existsSync(filePath) && statSync(filePath).isFile()) {
             tmpSourcePath = filePath
           }

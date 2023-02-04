@@ -4,7 +4,7 @@ import { parseDocument } from 'htmlparser2'
 import selectAll from 'css-select'
 import { textContent } from 'domutils'
 import { getFamily, parseFamilyMap } from './utils/parse-family-map'
-import { getAbsolutePath, getHash, unique } from './utils'
+import { getAbsolutePath, getHash, unique, removeParam } from './utils'
 import { TdeclaredFamilyMap, Tkv } from './types'
 
 type Document = ReturnType<typeof parseDocument>
@@ -35,7 +35,7 @@ export default function parse(basePath: string, files: string[]) {
         continue
       }
       // handler link tags
-      const sourcePath = (source as Tkv).attribs.href || ''
+      const sourcePath = removeParam((source as Tkv).attribs.href || '')
       const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
       if (
         extname(sourcePath) === '.css' &&
@@ -48,7 +48,7 @@ export default function parse(basePath: string, files: string[]) {
         parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)
         continue
       }
-      const AttrStyleContent = (source as Tkv).attribs.style
+      const AttrStyleContent = (source as Tkv).attribs.style || ''
       const family = getFamily(declaredFamilyMap, AttrStyleContent)
 
       if (declaredFamilyMap[family]) {

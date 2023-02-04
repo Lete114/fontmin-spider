@@ -68,9 +68,9 @@ export function backup(filePath: string) {
 
 /**
  * Generate hash
- * @param {String | Buffer} data Generate the contents of the hash
- * @param {Number} size The size (length) of the generated hash
- * @returns {String} hash
+ * @param { string | buffer } data Generate the contents of the hash
+ * @param { number } size The size (length) of the generated hash
+ * @returns { string } hash
  */
 export function getHash(data: string | Buffer, size = 10) {
   if (typeof data !== 'string' && !Buffer.isBuffer(data)) {
@@ -80,3 +80,10 @@ export function getHash(data: string | Buffer, size = 10) {
   const md5 = crypto.createHash('md5').update(data).digest('hex')
   return size > md5.length ? md5 : md5.slice(0, size)
 }
+
+/**
+ * 移除参数以及锚点
+ * @param { string } param string
+ * @returns { string } string
+ */
+export const removeParam = (param: string) => param.replace(/#.*$/, '').replace(/\?.*$/, '')
