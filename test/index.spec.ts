@@ -4,7 +4,7 @@ import { mkdtempSync, existsSync } from 'fs'
 import { describe, expect, it, afterAll } from 'vitest'
 import getFolderSize from 'get-folder-size'
 import { spider, parse } from '../src/main'
-import { getAbsolutePath, getQuoteless, unique, getUrls, backup } from '../src/utils'
+import { getAbsolutePath, getQuoteless, unique, getUrls, backup, getHash, removeParam } from '../src/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { removeSync, copySync } = require('fs-extra')
 
@@ -65,6 +65,22 @@ describe('utils', () => {
     const afterBackupPath = requireBackupPath.replace(/.ttf$/, '.backup.ttf')
     expect(backupPath).equal(afterBackupPath)
     expect(existsSync(afterBackupPath)).toBeTruthy()
+  })
+
+  it('getHash', () => {
+    const str = '1234567890'
+    const hash = getHash(str)
+    const hashMax = getHash(str, 32)
+    expect(hash).equal('e807f1fcf8')
+    expect(hashMax).equal('e807f1fcf82d132f9bb018ca6738a19f')
+  })
+
+  it('removeParam', () => {
+    const str = 'xxx.ttf?v=2574dae2ee'
+    const param = removeParam(str)
+    const paramHash = removeParam(str + '#666')
+    expect(param).equal('xxx.ttf')
+    expect(paramHash).equal('xxx.ttf')
   })
 })
 
