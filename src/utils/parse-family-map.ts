@@ -14,7 +14,7 @@ export function getFamily(declaredFamilyMap: Tkv, content: string | Buffer) {
   postcss({
     postcssPlugin: 'fontmin-spider-family-parse',
     Once(root) {
-      root.walkDecls(/font-family|font/, (decl) => {
+      root.walkDecls(/^(font-family|font)$/, (decl) => {
         family = decl.value
         if (decl.prop === 'font') {
           const font = Object.entries(declaredFamilyMap).find(([k]) => family.match(new RegExp(k)))
@@ -74,7 +74,7 @@ function parseFontFace(root: Root, basePath: string, importPath: string, declare
 
 function parseSelector(root: Root, declaredFamilyMap: Tkv) {
   const reg = /:?:(active|hover|focus|before|after)/g
-  root.walkDecls(/font-family|font/, (decl) => {
+  root.walkDecls(/^(font-family|font)$/, (decl) => {
     let content = ''
     let family = decl.value
     let selector = decl.parent && (decl.parent as Tkv).selector
