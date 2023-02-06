@@ -3,7 +3,7 @@ import { extname } from 'node:path'
 import { parseDocument } from 'htmlparser2'
 import selectAll from 'css-select'
 import { textContent } from 'domutils'
-import { getFamily, parseFamilyMap } from './utils/parse-family-map'
+import { getUseFamily, parseUseFamily, parseSelector } from './utils/parse-family-map'
 import { getAbsolutePath, getHash, unique, removeParam } from './utils'
 import { TdeclaredFamilyMap, Tkv } from './types'
 
@@ -18,12 +18,18 @@ type Document = ReturnType<typeof parseDocument>
 /* eslint-disable max-depth,max-statements */
 export default function parse(basePath: string, files: string[]) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
-  const caches = new Map()
+  const caches: Map<string, string | Buffer> = new Map()
+  const cacheDocment: Map<string, Document> = new Map()
+  const cacheDocments: Map<string, Document[]> = new Map()
+  const getDocument = (file: string) => parseDocument(readFileSync(file).toString())
   try {
     for (const file of files) {
-      const content = readFileSync(file).toString()
-      const dom = parseDocument(content)
-      const sources = selectAll('style,link[href],[style]', dom)
+      const doc = cacheDocment.has(file) ? (cacheDocment.get(file) as Document) : getDocument(file)
+      const sources = cacheDocments.has(file)
+        ? (cacheDocments.get(file) as Document[])
+        : selectAll('style,link[href],[style]', doc)
+      cacheDocment.set(file, doc)
+      cacheDocments.set(file, sources)
       for (const source of sources) {
         // handler style tags
         if ((source as Tkv).name === 'style') {
@@ -31,10 +37,11 @@ export default function parse(basePath: string, files: string[]) {
           const hash = getHash(StyleTextContent)
           if (!caches.has(hash)) {
             caches.set(hash, StyleTextContent)
-            parseFamilyMap(basePath, declaredFamilyMap, StyleTextContent, file)
+            parseUseFamily(basePath, declaredFamilyMap, StyleTextContent, file)
           }
           continue
         }
+
         // handler link tags
         const sourcePath = removeParam((source as Tkv).attribs.href || '')
         const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
@@ -46,18 +53,45 @@ export default function parse(basePath: string, files: string[]) {
         ) {
           const data = readFileSync(sourceAbsolutePath)
           caches.set(sourceAbsolutePath, data)
-          parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)
+          parseUseFamily(basePath, declaredFamilyMap, data, sourceAbsolutePath)
           continue
         }
+      }
+    }
+
+    for (const file of files) {
+      const doc = cacheDocment.has(file) ? (cacheDocment.get(file) as Document) : getDocument(file)
+      const sources = cacheDocments.has(file)
+        ? (cacheDocments.get(file) as Document[])
+        : selectAll('style,link[href],[style]', doc)
+      for (const source of sources) {
+        // handler style tags
+        if ((source as Tkv).name === 'style') {
+          const StyleTextContent = textContent(source)
+          parseSelector(declaredFamilyMap, StyleTextContent)
+          continue
+        }
+
+        // handler link tags
+        const sourcePath = removeParam((source as Tkv).attribs.href || '')
+        const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
+        if (extname(sourcePath) === '.css' && existsSync(sourceAbsolutePath) && statSync(sourceAbsolutePath).isFile()) {
+          const data = caches.has(sourceAbsolutePath)
+            ? (caches.get(sourceAbsolutePath) as string | Buffer)
+            : readFileSync(sourceAbsolutePath)
+          parseSelector(declaredFamilyMap, data)
+          continue
+        }
+
         const AttrStyleContent = (source as Tkv).attribs.style || ''
         if (!AttrStyleContent) continue
-        const family = getFamily(declaredFamilyMap, AttrStyleContent)
+        const family = getUseFamily(declaredFamilyMap, AttrStyleContent)
 
         if (declaredFamilyMap[family]) {
           declaredFamilyMap[family].chars += unique(textContent(source))
         }
       }
-      getText(dom, declaredFamilyMap)
+      getText(doc, declaredFamilyMap)
     }
   } catch (error) {
     // eslint-disable-next-line no-console
