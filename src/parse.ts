@@ -19,43 +19,49 @@ type Document = ReturnType<typeof parseDocument>
 export default function parse(basePath: string, files: string[]) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
   const caches = new Map()
-  for (const file of files) {
-    const content = readFileSync(file).toString()
-    const dom = parseDocument(content)
-    const sources = selectAll('style,link[href],[style]', dom)
-    for (const source of sources) {
-      // handler style tags
-      if ((source as Tkv).name === 'style') {
-        const StyleTextContent = textContent(source)
-        const hash = getHash(StyleTextContent)
-        if (!caches.has(hash)) {
-          caches.set(hash, StyleTextContent)
-          parseFamilyMap(basePath, declaredFamilyMap, StyleTextContent, file)
+  try {
+    for (const file of files) {
+      const content = readFileSync(file).toString()
+      const dom = parseDocument(content)
+      const sources = selectAll('style,link[href],[style]', dom)
+      for (const source of sources) {
+        // handler style tags
+        if ((source as Tkv).name === 'style') {
+          const StyleTextContent = textContent(source)
+          const hash = getHash(StyleTextContent)
+          if (!caches.has(hash)) {
+            caches.set(hash, StyleTextContent)
+            parseFamilyMap(basePath, declaredFamilyMap, StyleTextContent, file)
+          }
+          continue
         }
-        continue
-      }
-      // handler link tags
-      const sourcePath = removeParam((source as Tkv).attribs.href || '')
-      const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
-      if (
-        extname(sourcePath) === '.css' &&
-        existsSync(sourceAbsolutePath) &&
-        statSync(sourceAbsolutePath).isFile() &&
-        !caches.has(sourceAbsolutePath)
-      ) {
-        const data = readFileSync(sourceAbsolutePath)
-        caches.set(sourceAbsolutePath, data)
-        parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)
-        continue
-      }
-      const AttrStyleContent = (source as Tkv).attribs.style || ''
-      const family = getFamily(declaredFamilyMap, AttrStyleContent)
+        // handler link tags
+        const sourcePath = removeParam((source as Tkv).attribs.href || '')
+        const sourceAbsolutePath = getAbsolutePath(basePath, file, sourcePath)
+        if (
+          extname(sourcePath) === '.css' &&
+          existsSync(sourceAbsolutePath) &&
+          statSync(sourceAbsolutePath).isFile() &&
+          !caches.has(sourceAbsolutePath)
+        ) {
+          const data = readFileSync(sourceAbsolutePath)
+          caches.set(sourceAbsolutePath, data)
+          parseFamilyMap(basePath, declaredFamilyMap, data, sourceAbsolutePath)
+          continue
+        }
+        const AttrStyleContent = (source as Tkv).attribs.style || ''
+        if (!AttrStyleContent) continue
+        const family = getFamily(declaredFamilyMap, AttrStyleContent)
 
-      if (declaredFamilyMap[family]) {
-        declaredFamilyMap[family].chars += unique(textContent(source))
+        if (declaredFamilyMap[family]) {
+          declaredFamilyMap[family].chars += unique(textContent(source))
+        }
       }
+      getText(dom, declaredFamilyMap)
     }
-    getText(dom, declaredFamilyMap)
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('\x1b[31mfontmin-spider Error:\x1b[39m', error)
   }
   return declaredFamilyMap
 }
