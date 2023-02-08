@@ -5,7 +5,7 @@ import selectAll from 'css-select'
 import { textContent } from 'domutils'
 import { getUseFamily, parseUseFamily, parseSelector } from './utils/parse-family-map'
 import { getAbsolutePath, getHash, removeParam } from './utils'
-import { TdeclaredFamilyMap, Tkv } from './types'
+import { TdeclaredFamilyMap, TfilterCallback, Tkv } from './types'
 
 type Document = ReturnType<typeof parseDocument>
 
@@ -16,11 +16,7 @@ type Document = ReturnType<typeof parseDocument>
  * @returns { TdeclaredFamilyMap }
  */
 /* eslint-disable max-depth,max-statements */
-export default function parse(
-  basePath: string,
-  files: string[],
-  filter: Function = (declaredFamilyMap: TdeclaredFamilyMap) => {}
-) {
+export default function parse(basePath: string, files: string[], filter?: TfilterCallback) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
   const caches: Map<string, string | Buffer> = new Map()
   const cacheDocment: Map<string, Document> = new Map()
@@ -64,7 +60,7 @@ export default function parse(
     }
 
     // custom filter font
-    filter(declaredFamilyMap)
+    filter && filter(declaredFamilyMap)
 
     for (const file of files) {
       const doc = cacheDocment.has(file) ? (cacheDocment.get(file) as Document) : getDocument(file)

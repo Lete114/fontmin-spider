@@ -3,7 +3,7 @@ import fg from 'fast-glob'
 import Fontmin from 'fontmin'
 import parse from './parse'
 import { backup } from './utils'
-import { Toptions, TdeclaredFamilyMap, Tkv } from './types'
+import { Toptions, TdeclaredFamilyMap } from './types'
 export { default as parse } from './parse'
 
 /**
