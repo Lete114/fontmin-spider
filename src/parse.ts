@@ -13,10 +13,18 @@ type Document = ReturnType<typeof parseDocument>
  * Parsing the fonts used
  * @param { string } basePath You can think of it as the root of the website
  * @param { string[] } files Array of html files
+ * @param { Function } filter Execute when all the used fonts are parsed
+ * (the strings are not parsed, you can use the afterFilter method if you need to process the strings)
+ * @param { Function } afterFilter After parsing is complete, execute
  * @returns { TdeclaredFamilyMap }
  */
 /* eslint-disable max-depth,max-statements */
-export default function parse(basePath: string, files: string[], filter?: TfilterCallback) {
+export default function parse(
+  basePath: string,
+  files: string[],
+  filter?: TfilterCallback,
+  afterFilter?: TfilterCallback
+) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
   const caches: Map<string, string | Buffer> = new Map()
   const cacheDocment: Map<string, Document> = new Map()
@@ -96,6 +104,9 @@ export default function parse(basePath: string, files: string[], filter?: Tfilte
       }
       getText(doc, declaredFamilyMap)
     }
+
+    // custom filter font
+    afterFilter && afterFilter(declaredFamilyMap)
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('\x1b[31mfontmin-spider Error:\x1b[39m', error)

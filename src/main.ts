@@ -17,14 +17,16 @@ export { default as parse } from './parse'
  * Reserved text. For example, when using JavaScript to add text dynamically.
  * the fontmin-spider will not be able to parse the text and you will need to add the reserved text manually
  * @param { string[] } options.ignore Ignore html file. https://github.com/mrmlnc/fast-glob#ignore
- * @param { Function } options.filter Filter font
+ * @param { Function } options.filter Execute when all the used fonts are parsed
+ * (the strings are not parsed, you can use the afterFilter method if you need to process the strings)
+ * @param { Function } options.afterFilter After parsing is complete, execute
  */
 export function spider(options: { [T in keyof Toptions]: Toptions[T] }) {
   const fgOptions = { dot: true, absolute: true, cwd: options.basePath, ignore: options.ignore }
   options.backup = options.backup === false ? false : true
 
   const files = fg.sync(options.source || '**/*.html', fgOptions)
-  const fontMaps: TdeclaredFamilyMap = parse(options.basePath, files, options.filter)
+  const fontMaps: TdeclaredFamilyMap = parse(options.basePath, files, options.filter, options.afterFilter)
 
   return Promise.all(
     Object.entries(fontMaps).map(([name, font]) => {

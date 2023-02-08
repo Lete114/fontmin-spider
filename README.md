@@ -115,10 +115,26 @@ Required: `true`
 
 You can think of it as the root of the website
 
-### files
+#### files
 
 Type: `string[]`
 
 Required: `true`
 
 Array type html file (absolute path)
+
+#### filter
+
+Type: `Function`
+
+Required: `false`
+
+Execute when all the used fonts are parsed (the strings are not parsed, you can use the afterFilter method if you need to process the strings)
+
+#### afterFilter
+
+Type: `Function`
+
+Required: `false`
+
+After parsing is complete, execute

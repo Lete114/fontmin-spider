@@ -17,4 +17,5 @@ export type Toptions = {
   reserveText?: string | { [key: string]: string }
   ignore?: string[]
   filter?: TfilterCallback
+  afterFilter?: TfilterCallback
 }
