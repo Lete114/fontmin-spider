@@ -38,6 +38,9 @@ export function spider(options: { [T in keyof Toptions]: Toptions[T] }) {
           const reserveText = (options as any).reserveText[name]
           if (reserveText) font.chars += reserveText
         }
+
+        if (!font.chars) return resolve(null)
+
         const path = font.path
         if (options.backup) font.path = backup(font.path)
 
