@@ -21,13 +21,6 @@ export function getAbsolutePath(basePath: string, improtPath: string, sourcePath
 export const getQuoteless = (str: string) => str.replace(/(['"])(.+)\1/g, '$2')
 
 /**
- * String de-duplication
- * @param { string } chars Strings to be de-duplicated
- * @returns { string } String after processing duplicate content
- */
-export const unique = (chars: string) => Array.from(new Set(chars)).join('').replace(/\s*/g, '')
-
-/**
  * Get the resource referenced by url() in css
  * @param { string } value css property value
  * @returns { string[] } Content in url() after processing

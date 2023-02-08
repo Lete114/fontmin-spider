@@ -4,7 +4,7 @@ import { parseDocument } from 'htmlparser2'
 import selectAll from 'css-select'
 import { textContent } from 'domutils'
 import { getUseFamily, parseUseFamily, parseSelector } from './utils/parse-family-map'
-import { getAbsolutePath, getHash, unique, removeParam } from './utils'
+import { getAbsolutePath, getHash, removeParam } from './utils'
 import { TdeclaredFamilyMap, Tkv } from './types'
 
 type Document = ReturnType<typeof parseDocument>
@@ -95,7 +95,7 @@ export default function parse(
         const family = getUseFamily(declaredFamilyMap, AttrStyleContent)
 
         if (declaredFamilyMap[family]) {
-          declaredFamilyMap[family].chars += unique(textContent(source))
+          declaredFamilyMap[family].chars += textContent(source)
         }
       }
       getText(doc, declaredFamilyMap)
@@ -116,6 +116,5 @@ function getText(dom: Document, familyMap: TdeclaredFamilyMap) {
       const node = selectAll(item, dom)
       familyMap[key].chars += textContent(node)
     })
-    familyMap[key].chars = unique(familyMap[key].chars)
   }
 }

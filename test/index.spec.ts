@@ -4,7 +4,7 @@ import { mkdtempSync, existsSync } from 'fs'
 import { describe, expect, it, afterAll } from 'vitest'
 import getFolderSize from 'get-folder-size'
 import { spider, parse } from '../src/main'
-import { getAbsolutePath, getQuoteless, unique, getUrls, backup, getHash, removeParam } from '../src/utils'
+import { getAbsolutePath, getQuoteless, getUrls, backup, getHash, removeParam } from '../src/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { removeSync, copySync } = require('fs-extra')
 
@@ -28,19 +28,13 @@ describe('utils', () => {
     expect(result3).equal(path) // /test/index.css === /test/index.css
     expect(result4).equal(join(basePath, '../index.css')) // /index.css === /index.css
   })
+
   it('getQuoteless', () => {
     /* eslint-disable quotes */
     expect(getQuoteless(`'666'`)).equal('666')
     expect(getQuoteless(`"666"`)).equal('666')
     expect(getQuoteless(`"666" 'result'`)).equal('666 result')
     expect(getQuoteless(`"666 'result'`)).equal('"666 result')
-    /* eslint-enable */
-  })
-  it('unique', () => {
-    /* eslint-disable quotes */
-    expect(unique(`'666'`)).equal(`'6`)
-    expect(unique(`"666"`)).equal('"6')
-    expect(unique(`"666" 'result' result result`)).equal(`"6'result`)
     /* eslint-enable */
   })
 
