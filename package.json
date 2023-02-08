@@ -1,6 +1,6 @@
 {
   "name": "fontmin-spider",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "Analyze which fonts are used on the page and eliminate the ones that are not used to get a smaller font file",
   "main": "dist/main.js",
   "scripts": {
