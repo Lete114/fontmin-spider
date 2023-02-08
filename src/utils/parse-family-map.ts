@@ -86,7 +86,7 @@ export function parseSelector(declaredFamilyMap: Tkv, content: string | Buffer) 
           const value = decl.parent?.nodes.find((node) => (node as Tkv).prop === 'content')
           if (value) content = getQuoteless((value as Tkv).value)
         }
-        selector = (selector as string).replace(reg, '')
+        selector = (selector as string).replace(reg, '').replace(/\r?\n/g,'')
 
         if (decl.prop === 'font') {
           const font = Object.entries(declaredFamilyMap).find(([k]) => family.match(new RegExp(k)))
