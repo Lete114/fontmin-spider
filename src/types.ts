@@ -9,6 +9,7 @@ export type Toptions = {
   backup?: boolean
   reserveText?: string | { [key: string]: string }
   ignore?: string[]
+  filter?: Function
 }
 
 export type TdeclaredFamilyMap = {

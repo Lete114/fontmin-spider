@@ -16,7 +16,11 @@ type Document = ReturnType<typeof parseDocument>
  * @returns { TdeclaredFamilyMap }
  */
 /* eslint-disable max-depth,max-statements */
-export default function parse(basePath: string, files: string[]) {
+export default function parse(
+  basePath: string,
+  files: string[],
+  filter: Function = (declaredFamilyMap: TdeclaredFamilyMap) => {}
+) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
   const caches: Map<string, string | Buffer> = new Map()
   const cacheDocment: Map<string, Document> = new Map()
@@ -58,6 +62,9 @@ export default function parse(basePath: string, files: string[]) {
         }
       }
     }
+
+    // custom filter font
+    filter(declaredFamilyMap)
 
     for (const file of files) {
       const doc = cacheDocment.has(file) ? (cacheDocment.get(file) as Document) : getDocument(file)

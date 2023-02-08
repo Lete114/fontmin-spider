@@ -3,7 +3,7 @@ import fg from 'fast-glob'
 import Fontmin from 'fontmin'
 import parse from './parse'
 import { backup } from './utils'
-import { Toptions, TdeclaredFamilyMap } from './types'
+import { Toptions, TdeclaredFamilyMap, Tkv } from './types'
 export { default as parse } from './parse'
 
 /**
@@ -16,14 +16,16 @@ export { default as parse } from './parse'
  * @param { string | object } options.reserveText
  * Reserved text. For example, when using JavaScript to add text dynamically.
  * the fontmin-spider will not be able to parse the text and you will need to add the reserved text manually
- * @param { string[] } options.ignore https://github.com/mrmlnc/fast-glob#ignore
+ * @param { string[] } options.ignore Ignore html file. https://github.com/mrmlnc/fast-glob#ignore
+ * @param { Function } options.filter Filter font
  */
 export function spider(options: { [T in keyof Toptions]: Toptions[T] }) {
   const fgOptions = { dot: true, absolute: true, cwd: options.basePath, ignore: options.ignore }
   options.backup = options.backup === false ? false : true
 
   const files = fg.sync(options.source || '**/*.html', fgOptions)
-  const fontMaps: TdeclaredFamilyMap = parse(options.basePath, files)
+  const fontMaps: TdeclaredFamilyMap = parse(options.basePath, files, options.filter)
+
   return Promise.all(
     Object.entries(fontMaps).map(([name, font]) => {
       return new Promise((resolve, reject) => {
