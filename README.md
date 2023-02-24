@@ -19,7 +19,6 @@ const { spider, parse } = require('fontmin-spider')
   // default: **/*.html
   await spider({ basePath })
 
-
   /* 
     // css
     p {
@@ -43,6 +42,35 @@ const { spider, parse } = require('fontmin-spider')
       ....
     }
   */
+})()
+```
+
+This is an example: compress only specified characters, e.g. only [CJK](https://wikipedia.org/wiki/CJK_characters) (CJK Unified Ideographs) characters
+
+```js
+const { spider } = require('fontmin-spider')
+function getCJK(str: string) {
+  const reg =
+    /[\u4e00-\u9fa5\u3040-\u30ff\u31f0-\u31ff\uff00-\uff9f\u3000-\u303f\uff01-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff60\uffe0-\uffe6]/g
+  const cjkChars = str.match(reg)
+  return cjkChars ? cjkChars.join('') : ''
+}
+;(async () => {
+  const basePath = '/home/site/'
+  // Recursively read all html files in the /home/site/ directory
+  // default: **/*.html
+  await spider({
+    basePath,
+    /**
+     * Execute the filter function after parsing is complete
+     * @param { { selector: string[]; path: string; chars: string } } declaredFamilyMap Font parameters
+     */
+    afterFilter(declaredFamilyMap) {
+      for (const [, value] of Object.entries(declaredFamilyMap)) {
+        value.chars = getCJK(value.chars)
+      }
+    }
+  })
 })()
 ```
 

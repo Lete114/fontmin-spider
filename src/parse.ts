@@ -5,7 +5,7 @@ import selectAll from 'css-select'
 import { textContent } from 'domutils'
 import { getUseFamily, parseUseFamily, parseSelector } from './utils/parse-family-map'
 import { getAbsolutePath, getHash, removeParam } from './utils'
-import { TdeclaredFamilyMap, TfilterCallback, Tkv } from './types'
+import { TdeclaredFamilyMap, TparseOptions, Tkv } from './types'
 
 type Document = ReturnType<typeof parseDocument>
 
@@ -13,17 +13,17 @@ type Document = ReturnType<typeof parseDocument>
  * Parsing the fonts used
  * @param { string } basePath You can think of it as the root of the website
  * @param { string[] } files Array of html files
- * @param { Function } filter Execute when all the used fonts are parsed
+ * @param options
+ * @param { Function } options.filter Execute when all the used fonts are parsed
  * (the strings are not parsed, you can use the afterFilter method if you need to process the strings)
- * @param { Function } afterFilter After parsing is complete, execute
+ * @param { Function } options.afterFilter After parsing is complete, execute
  * @returns { TdeclaredFamilyMap }
  */
 /* eslint-disable max-depth,max-statements */
 export default function parse(
   basePath: string,
   files: string[],
-  filter?: TfilterCallback,
-  afterFilter?: TfilterCallback
+  options?: { [T in keyof TparseOptions]: TparseOptions[T] }
 ) {
   const declaredFamilyMap: TdeclaredFamilyMap = {}
   const caches: Map<string, string | Buffer> = new Map()
@@ -68,7 +68,7 @@ export default function parse(
     }
 
     // custom filter font
-    filter && filter(declaredFamilyMap)
+    options?.filter && options.filter(declaredFamilyMap)
 
     for (const file of files) {
       const doc = cacheDocment.has(file) ? (cacheDocment.get(file) as Document) : getDocument(file)
@@ -106,7 +106,7 @@ export default function parse(
     }
 
     // custom filter font
-    afterFilter && afterFilter(declaredFamilyMap)
+    options?.afterFilter && options.afterFilter(declaredFamilyMap)
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('\x1b[31mfontmin-spider Error:\x1b[39m', error)

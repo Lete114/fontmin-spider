@@ -26,7 +26,7 @@ export function spider(options: { [T in keyof Toptions]: Toptions[T] }) {
   options.backup = options.backup === false ? false : true
 
   const files = fg.sync(options.source || '**/*.html', fgOptions)
-  const fontMaps: TdeclaredFamilyMap = parse(options.basePath, files, options.filter, options.afterFilter)
+  const fontMaps: TdeclaredFamilyMap = parse(options.basePath, files, options)
 
   return Promise.all(
     Object.entries(fontMaps).map(([name, font]) => {
